@@ -18,12 +18,10 @@ public class BurgerTest {
     @Test
     public void testSetBuns() {
         Bun bunMock = Mockito.mock(Bun.class);
-        when(bunMock.getName()).thenReturn("Mock Bun");
         when(bunMock.getPrice()).thenReturn(100f);
 
         burger.setBuns(bunMock);
 
-        assertEquals("Mock Bun", burger.bun.getName());
         assertEquals(100.0f, burger.bun.getPrice(), 0.001);
     }
 

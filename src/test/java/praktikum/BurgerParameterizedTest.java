@@ -4,63 +4,80 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
-import static org.junit.Assert.*;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 @RunWith(Parameterized.class)
 public class BurgerParameterizedTest {
 
     private final String bunName;
     private final float bunPrice;
-    private final List<Ingredient> ingredients;
+    private final Object[][] ingredientTuples;
     private final float expectedPrice;
 
     private Burger burger;
+    private Bun mockBun;
+    private List<Ingredient> mockIngredients;
 
-    public BurgerParameterizedTest(String bunName, float bunPrice, List<Ingredient> ingredients, float expectedPrice) {
+    public BurgerParameterizedTest(String bunName, float bunPrice, Object[][] ingredientTuples, float expectedPrice) {
         this.bunName = bunName;
         this.bunPrice = bunPrice;
-        this.ingredients = ingredients;
+        this.ingredientTuples = ingredientTuples;
         this.expectedPrice = expectedPrice;
     }
 
-    @Parameters
+    @Parameterized.Parameters(name = "{index}: bun={0}, expectedPrice={3}")
     public static Collection<Object[]> data() {
-        Collection<Object[]> params = new ArrayList<>();
-
-        // Тестовый случай 1: Булочка с двумя ингредиентами
-        List<Ingredient> ingredients1 = new ArrayList<>();
-        ingredients1.add(new Ingredient(IngredientType.SAUCE, "TestSauce", 20f));
-        ingredients1.add(new Ingredient(IngredientType.FILLING, "TestFilling", 30f));
-        float price1 = 100f * 2 + 20f + 30f; // 250.0
-        params.add(new Object[]{"Test Bun", 100f, ingredients1, price1});
-
-        // Тестовый случай 2: Булочка с одним ингредиентом
-        List<Ingredient> ingredients2 = new ArrayList<>();
-        ingredients2.add(new Ingredient(IngredientType.FILLING, "MiniFilling", 15f));
-        float price2 = 50f * 2 + 15f; // 115.0
-        params.add(new Object[]{"Mini Bun", 50f, ingredients2, price2});
-
-        // Тестовый случай 3: Булочка без ингредиентов
-        List<Ingredient> ingredients3 = new ArrayList<>();
-        float price3 = 80f * 2; // 160.0
-        params.add(new Object[]{"Empty Bun", 80f, ingredients3, price3});
-
-        return params;
+        return Arrays.asList(new Object[][] {
+                {
+                        "Test Bun", 100f,
+                        new Object[][] {
+                                { IngredientType.SAUCE,   "TestSauce",   20f },
+                                { IngredientType.FILLING, "TestFilling", 30f }
+                        },
+                        100f * 2 + 20f + 30f  // 250f
+                },
+                {
+                        "Mini Bun", 50f,
+                        new Object[][] {
+                                { IngredientType.FILLING, "MiniFilling", 15f }
+                        },
+                        50f * 2 + 15f  // 115f
+                },
+                {
+                        "Empty Bun", 80f,
+                        new Object[][] {},
+                        80f * 2  // 160f
+                }
+        });
     }
 
     @Before
     public void setUp() {
         burger = new Burger();
-        Bun bun = new Bun(bunName, bunPrice);
-        burger.setBuns(bun);
-        for (Ingredient ingredient : ingredients) {
-            burger.addIngredient(ingredient);
+
+        mockBun = mock(Bun.class);
+        when(mockBun.getName()).thenReturn(bunName);
+        when(mockBun.getPrice()).thenReturn(bunPrice);
+        burger.setBuns(mockBun);
+
+        mockIngredients = new ArrayList<>();
+
+        for (Object[] tuple : ingredientTuples) {
+            IngredientType type = (IngredientType) tuple[0];
+            String name = (String) tuple[1];
+            float price = (Float) tuple[2];
+
+            Ingredient ing = mock(Ingredient.class);
+            when(ing.getType()).thenReturn(type);
+            when(ing.getName()).thenReturn(name);
+            when(ing.getPrice()).thenReturn(price);
+
+            burger.addIngredient(ing);
+            mockIngredients.add(ing);
         }
     }
 
@@ -71,14 +88,16 @@ public class BurgerParameterizedTest {
 
     @Test
     public void testGetReceiptParameterized() {
-        StringBuilder expectedReceipt = new StringBuilder(String.format("(==== %s ====)%n", bunName));
-        for (Ingredient ingredient : ingredients) {
-            expectedReceipt.append(String.format("= %s %s =%n",
-                    ingredient.getType().toString().toLowerCase(), ingredient.getName()));
+        StringBuilder expected = new StringBuilder();
+        expected.append(String.format("(==== %s ====)%n", bunName));
+        for (Ingredient ing : mockIngredients) {
+            expected.append(String.format("= %s %s =%n",
+                    ing.getType().toString().toLowerCase(),
+                    ing.getName()));
         }
-        expectedReceipt.append(String.format("(==== %s ====)%n", bunName));
-        expectedReceipt.append(String.format("%nPrice: %f%n", expectedPrice));
+        expected.append(String.format("(==== %s ====)%n", bunName));
+        expected.append(String.format("%nPrice: %f%n", expectedPrice));
 
-        assertEquals(expectedReceipt.toString(), burger.getReceipt());
+        assertEquals(expected.toString(), burger.getReceipt());
     }
 }
