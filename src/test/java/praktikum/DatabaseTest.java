@@ -19,16 +19,12 @@ public class DatabaseTest {
     @Test
     public void testAvailableBunsNotEmpty() {
         List<Bun> buns = database.availableBuns();
-        assertNotNull(buns);
-        // В конструкторе Database добавляем 3 булки
         assertEquals(3, buns.size());
     }
 
     @Test
     public void testAvailableIngredientsNotEmpty() {
         List<Ingredient> ingredients = database.availableIngredients();
-        assertNotNull(ingredients);
-        // В конструкторе Database добавляем 6 ингредиентов (3 соуса и 3 начинки)
         assertEquals(6, ingredients.size());
     }
 }

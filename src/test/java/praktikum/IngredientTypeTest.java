@@ -6,14 +6,22 @@ import static org.junit.Assert.*;
 public class IngredientTypeTest {
 
     @Test
-    public void testToStringValues() {
-        assertEquals("SAUCE", IngredientType.SAUCE.toString());
+    public void testFillingToString() {
         assertEquals("FILLING", IngredientType.FILLING.toString());
     }
 
     @Test
-    public void testToLowerCaseConversion() {
-        assertEquals("sauce", IngredientType.SAUCE.toString().toLowerCase());
+    public void testSauceToString() {
+        assertEquals("SAUCE", IngredientType.SAUCE.toString());
+    }
+
+    @Test
+    public void testFillingToLowerCaseConversion() {
         assertEquals("filling", IngredientType.FILLING.toString().toLowerCase());
+    }
+
+    @Test
+    public void testSauceToLowerCaseConversion() {
+        assertEquals("sauce", IngredientType.SAUCE.toString().toLowerCase());
     }
 }
